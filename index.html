@@ -3,76 +3,210 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>★☆ SinisterBoy ☆★</title>
+  <title>★ SinisterGirl ★</title>
+  <link rel="icon" href="favicon.png" />
+  <meta name="description" content="Valerie (SinisterGirl) — gamer, artist, coder. Chasing dreams through galaxies of games and sound." />
+  <meta name="theme-color" content="#07040f" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <script>
+    /* show the intro once per visit (skipped for reduced motion) */
+    (function () {
+      var r = document.documentElement;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      try { if (sessionStorage.getItem('introSeen')) return; } catch (e) {}
+      r.classList.add('intro-on');
+    })();
+  </script>
 </head>
 <body>
-  <div class="stars"></div>
-  <div class="twinkling"></div>
+  <!-- Intro: warp into space -->
+  <div id="intro" aria-hidden="true">
+    <canvas id="warp"></canvas>
+    <div class="intro-text">
+      <span class="intro-name">SinisterGirl</span>
+      <span class="intro-sub">entering the galaxy…</span>
+    </div>
+    <span class="intro-skip">click to skip</span>
+  </div>
 
-  <header>
-    <h1>★☆ SinisterBoy ☆★</h1>
-    <p class="subtitle">"Chasing dreams through galaxies of games and sound."</p>
+  <!-- Background layers -->
+  <canvas id="space" aria-hidden="true"></canvas>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+  <div class="progress" aria-hidden="true"></div>
+  <canvas id="sparkle" aria-hidden="true"></canvas>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <a href="#home" class="nav-logo">SG</a>
+    <ul>
+      <li><a href="#about">About</a></li>
+      <li><a href="#hobbies">Hobbies</a></li>
+      <li><a href="#games">Games</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#music">Music</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <header id="home" class="hero">
+    <div class="avatar reveal">
+      <div class="avatar-ring"></div>
+      <div class="avatar-core"><img src="avatar.jpg" alt="Valerie (SinisterGirl) profile picture" width="512" height="512" /></div>
+      <span class="status-dot" title="Online"></span>
+    </div>
+
+    <p class="hero-hello reveal">Hey, I'm Valerie 👋🏼</p>
+    <h1 class="glitch reveal" data-text="SinisterGirl">SinisterGirl</h1>
+    <p class="typer reveal">I'm a <span id="typed"></span><span class="caret"></span></p>
+
+    <div class="chips reveal">
+      <span class="chip">✦ <span class="age">20</span> years</span>
+      <span class="chip">🏳️‍⚧️ She / Her</span>
+      <span class="chip">✦ Dec 20th</span>
+    </div>
+
+    <a class="presence reveal" id="presence" href="#contact" hidden>
+      <span class="p-dot"></span><span class="p-text" id="presenceText">Discord</span>
+    </a>
+
+    <div class="cta reveal">
+      <a class="btn btn-primary magnetic" href="https://discordapp.com/users/494168335391391760" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Message me
+      </a>
+      <a class="btn btn-ghost magnetic" href="#games">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg>
+        What I play
+      </a>
+    </div>
+
+    <a href="#about" class="scroll-hint" aria-label="Scroll down"></a>
   </header>
 
   <main>
-    <!-- ✦ Personal Info ✦ -->
-    <section class="card personal_card">
-      <h2>✦ Personal Information ✦</h2>
-      <p>✧ <b>Name:</b> Jay / JayJay (Justin)</p>
-      <p>✧ <b>Age:</b> 19</p>
-      <p>✧ <b>Birthday:</b> December 20th</p>
-      <p>✧ <b>Pronouns:</b> He / Them</p>
-      <p>✧ <b>Relationship Status:</b> Heart belongs to someone 💞</p>
-      <p>✧ <b>Gaming Alias:</b> ★☆ SinisterBoy ☆★</p>
+    <!-- ✦ About ✦ -->
+    <section id="about">
+      <div class="section-head reveal">
+        <span class="eyebrow">01 — Who I am</span>
+        <h2>About <span class="grad">me</span></h2>
+      </div>
+
+      <div class="bento">
+        <article class="card tilt about-main reveal">
+          <h3 class="big-name">Valerie</h3>
+          <p class="lead">"Chasing dreams through galaxies of games and sound."</p>
+          <dl class="info">
+            <div><dt>Name</dt><dd><span class="v">Valerie</span></dd></div>
+            <div><dt>Age</dt><dd><span class="v age">20</span></dd></div>
+            <div><dt>Birthday</dt><dd><span class="v">December 20th</span></dd></div>
+            <div><dt>Pronouns</dt><dd><span class="v">She / Her</span> 🏳️‍⚧️</dd></div>
+          </dl>
+          <p class="journey"><span>On my journey as a trans girl</span> 💜</p>
+        </article>
+
+        <article class="card tilt birthday reveal">
+          <span class="card-label">🎂 Birthday countdown</span>
+          <div class="countdown"><span id="bdayDays">--</span><small id="bdayLabel">days to go</small></div>
+          <div class="bar"><span id="bdayBar"></span></div>
+        </article>
+
+        <div id="aboutBoxes" hidden></div>
+      </div>
     </section>
 
     <!-- ✦ Hobbies ✦ -->
-    <section class="card hobby_card">
-      <h2>✦ Hobbies & Interests ✦</h2>
-      <p>🎵 <b>Listening to Music:</b> Exploring various genres and discovering new tunes.</p>
-      <p>📚 <b>Reading Mangas/Books:</b> Diving into captivating stories and adventures.</p>
-      <p>🏃 <b>Sport:</b> Staying active and fit through different physical activities.</p>
-      <p>🎭 <b>Roleplay:</b> Engaging in imaginative and immersive role-playing scenarios.</p>
-      <p>🎨 <b>Drawing:</b> Creating art and expressing creativity through illustrations.</p>
-      <p>🎮 <b>Gaming:</b> Diving into Breathtakeing worlds full of colors or maybe dark and horrorfying ones ?</p>
-      <p>💻 <b>Programming:</b> Learning/Experimenting with codes and make my own tools on the side.</p>
+    <section id="hobbies">
+      <div class="section-head reveal">
+        <span class="eyebrow">02 — What I love</span>
+        <h2>Hobbies &amp; <span class="grad">interests</span></h2>
+      </div>
+
+      <div class="hobby-grid" id="hobbyList"></div>
     </section>
 
     <!-- ✦ Games ✦ -->
-    <section class="card games_card">
-      <h2>✦ Favorite Games ✦</h2>
-      <ul>
-        <li>🎮 <a href="https://store.steampowered.com/app/381210/Dead_by_Daylight/">Dead by Daylight</a></li>
-        <li>🚀 <a href="https://store.steampowered.com/app/1449110/The_Outer_Worlds_2/">The Outer Worlds 2</a></li>
-        <li>💥 <a href="https://store.steampowered.com/app/397540/Borderlands_3/">Borderlands 3</a></li>
-        <li>🐉 <a href="https://store.steampowered.com/app/1623730/Palworld/">Palworld</a></li>
-        <li>🌃 <a href="https://store.steampowered.com/app/1091500/Cyberpunk_2077/">Cyberpunk 2077</a></li>
-      </ul>
+    <section id="games">
+      <div class="section-head reveal">
+        <span class="eyebrow">03 — My favorites</span>
+        <h2>Favorite <span class="grad">games</span></h2>
+      </div>
+
+      <div class="game-grid" id="gameList"></div>
     </section>
 
-    <!-- ✦ Songs ✦ -->
-    <section class="card music_card">
-      <h2>✦ Favorite Songs ✦</h2>
-      <ul>
-        <li>🎧 <a href="https://open.spotify.com/intl-de/track/0C4ejWmOTMv8vuYj85mf8m?si=3a02b7b2a39b49af">S&M</a></li>
-        <li>🎶 <a href="https://open.spotify.com/intl-de/track/3rkSjkhFvhRt4BZKXq99d4?si=3d25746518ba4ea5">Mafia - Remix</a></li>
-        <li>🔥 <a href="https://open.spotify.com/intl-de/track/3jJTrW9rTO5V0RuLNmCp2h?si=971a0e7c3c574ca9">Bow Down</a></li>
-        <li>💻 <a href="https://open.spotify.com/track/6HMxF1RJilVOcdRmxfobya?si=1f0d78d714974e6b">Cool on the Internet</a></li>
-        <li>⚡ <a href="https://open.spotify.com/intl-de/track/0WUIGqyq3zUo8BXchrGu1x?si=ef0ab058a46545b9">Dirty Vibe</a></li>
-      </ul>
+    <!-- ✦ Gallery ✦ -->
+    <section id="gallery">
+      <div class="section-head reveal">
+        <span class="eyebrow">04 — Snapshots</span>
+        <h2>My <span class="grad">gallery</span></h2>
+      </div>
+      <div class="gallery-list" id="galleryList"></div>
+    </section>
+
+    <!-- ✦ Music ✦ -->
+    <section id="music">
+      <div class="section-head reveal">
+        <span class="eyebrow">05 — On repeat</span>
+        <h2>Favorite <span class="grad">songs</span></h2>
+      </div>
+
+      <div class="card tracks reveal" id="songList"></div>
     </section>
 
     <!-- ✦ Contact ✦ -->
-    <section class="card social_card">
-      <h2>✦ Contact & Social ✦</h2>
-      <p>📱 <b>Discord:</b> <a href="https://discordapp.com/users/494168335391391760">★☆ SinisterBoy ☆★</a></p>
-      <p>🎮 <b>Steam:</b> <a href="https://steamcommunity.com/id/ThexoXNEOXox/">★☆ SinisterBoy ☆★</a></p>
+    <section id="contact">
+      <div class="section-head reveal">
+        <span class="eyebrow">06 — Say hi</span>
+        <h2>Contact &amp; <span class="grad">social</span></h2>
+      </div>
+
+      <div class="card discord-live reveal" id="discordCard" hidden>
+        <div class="dl-head">
+          <span class="card-label">🛰️ Live on Discord</span>
+          <span class="dl-status"><span class="p-dot"></span><span id="dlStatusText">Connecting…</span></span>
+        </div>
+        <div class="dl-activity">
+          <div class="dl-art" id="dlArt">🎮</div>
+          <div class="dl-info">
+            <span class="dl-type" id="dlType">Status</span>
+            <strong id="dlName">—</strong>
+            <span id="dlDetails"></span>
+            <span id="dlState"></span>
+          </div>
+        </div>
+        <div class="dl-progress" id="dlProgress" hidden>
+          <div class="bar"><span id="dlBar"></span></div>
+          <div class="dl-times"><span id="dlCur">0:00</span><span id="dlEnd">0:00</span></div>
+        </div>
+        <p class="dl-custom" id="dlCustom" hidden></p>
+      </div>
+
+      <div class="contact-grid">
+        <a class="card tilt contact reveal" href="https://discordapp.com/users/494168335391391760" target="_blank" rel="noopener">
+          <span class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <div><span class="card-label">Discord</span><h3>★☆ SinisterGirl ☆★</h3></div>
+          <span class="arrow">↗</span>
+        </a>
+        <a class="card tilt contact reveal" href="https://steamcommunity.com/id/ThexoXNEOXox/" target="_blank" rel="noopener">
+          <span class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg></span>
+          <div><span class="card-label">Steam</span><h3>★☆ SinisterGirl ☆★</h3></div>
+          <span class="arrow">↗</span>
+        </a>
+      </div>
     </section>
   </main>
 
   <footer>
-    <p>✨ "Always chasing dreams — one game, one song, one story at a time." ✨</p>
+    <p class="quote reveal">✨ "Always chasing dreams — one game, one song, one story at a time." ✨</p>
   </footer>
+
+  <script src="content.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

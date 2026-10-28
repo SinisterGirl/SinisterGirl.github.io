@@ -1,0 +1,4 @@
+Drop your game screenshots into this folder (jpg, png, gif, webp).
+They show up automatically in the "Game screenshots" gallery on your page.
+Tip: the file name becomes the caption, e.g. "palworld-base.png" -> "palworld base".
+Files are sorted by name, so you can put numbers in front to choose the order (01-..., 02-...).
