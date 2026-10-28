@@ -1,4 +1,0 @@
-Drop your drawings into this folder (jpg, png, gif, webp).
-They show up automatically in the "My art" gallery on your page.
-Tip: the file name becomes the caption, e.g. "moonlight-witch.jpg" -> "moonlight witch".
-Files are sorted by name, so you can put numbers in front to choose the order (01-..., 02-...).
