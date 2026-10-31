@@ -217,49 +217,63 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = matchMedia('(pointer: fine)').matches;
 
-  /* ---------- Starfield with parallax + shooting stars ---------- */
+  /* ---------- Starfield (pre-rendered layers = smooth) ---------- */
   const canvas = document.getElementById('space');
-  const ctx = canvas.getContext('2d');
-  let w, h, dpr, stars = [], shooting = [];
+  const ctx = canvas.getContext('2d', { alpha: false });
+  let w, h, dpr, layers = [], shooting = [];
   const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
   const hues = [null, null, 280, 190, 310];
+  const DEPTHS = [0.2, 0.45, 0.7, 1];
 
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = canvas.width = innerWidth * dpr;
-    h = canvas.height = innerHeight * dpr;
-    const count = Math.min(450, Math.round((innerWidth * innerHeight) / 3200));
-    stars = Array.from({ length: count }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      z: Math.random() * 0.9 + 0.1,          // depth: 0.1 far → 1 near
-      r: Math.random() * 1.3 + 0.3,
-      t: Math.random() * Math.PI * 2,
-      s: Math.random() * 0.03 + 0.005,
-      hue: hues[(Math.random() * hues.length) | 0],
-    }));
-    if (reduce) draw();
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    w = canvas.width = Math.round(innerWidth * dpr);
+    h = canvas.height = Math.round(innerHeight * dpr);
+    const total = Math.min(380, Math.round((innerWidth * innerHeight) / 3600));
+    // each depth layer is drawn ONCE into its own canvas, then just moved around
+    layers = DEPTHS.map((z, i) => {
+      const off = document.createElement('canvas');
+      off.width = w; off.height = h;
+      const o = off.getContext('2d');
+      const n = Math.round(total / DEPTHS.length);
+      for (let k = 0; k < n; k++) {
+        const hue = hues[(Math.random() * hues.length) | 0];
+        o.fillStyle = hue === null ? '#fff' : `hsl(${hue},100%,82%)`;
+        o.globalAlpha = 0.35 + Math.random() * 0.65 * z;
+        o.beginPath();
+        o.arc(Math.random() * w, Math.random() * h, (Math.random() * 1.2 + 0.4) * dpr * (0.45 + z * 0.6), 0, Math.PI * 2);
+        o.fill();
+      }
+      return { canvas: off, z, phase: i * 1.7, speed: 0.6 + Math.random() * 0.8 };
+    });
+    draw(performance.now());
   }
 
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
+  const tile = (img, ox, oy, alpha) => {
+    ox = ((ox % w) + w) % w;
+    oy = ((oy % h) + h) % h;
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(img, ox - w, oy - h);
+    ctx.drawImage(img, ox, oy - h);
+    ctx.drawImage(img, ox - w, oy);
+    ctx.drawImage(img, ox, oy);
+  };
+
+  function draw(now) {
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#07040f';
+    ctx.fillRect(0, 0, w, h);
     mouse.x += (mouse.tx - mouse.x) * 0.05;
     mouse.y += (mouse.ty - mouse.y) * 0.05;
     const sy = window.scrollY * dpr;
-
-    for (const s of stars) {
-      s.t += s.s;
-      const tw = 0.5 + Math.sin(s.t) * 0.5;
-      let x = (s.x - mouse.x * 50 * dpr * s.z) % w; if (x < 0) x += w;
-      let y = (s.y - sy * 0.12 * s.z - mouse.y * 50 * dpr * s.z) % h; if (y < 0) y += h;
-      const alpha = 0.25 + tw * 0.75 * s.z;
-      ctx.beginPath();
-      ctx.arc(x, y, s.r * dpr * (0.4 + s.z * 0.6), 0, Math.PI * 2);
-      ctx.fillStyle = s.hue === null ? `rgba(255,255,255,${alpha})` : `hsla(${s.hue},100%,80%,${alpha})`;
-      ctx.fill();
+    const t = now / 1000;
+    for (const L of layers) {
+      const twinkle = reduce ? 1 : 0.7 + Math.sin(t * L.speed + L.phase) * 0.3;
+      tile(L.canvas, -mouse.x * 50 * dpr * L.z, -sy * 0.12 * L.z - mouse.y * 50 * dpr * L.z, twinkle);
     }
+    ctx.globalAlpha = 1;
 
-    if (!reduce && Math.random() < 0.007) {
+    if (!reduce && Math.random() < 0.006) {
       shooting.push({
         x: Math.random() * w * 0.7 + w * 0.3,
         y: Math.random() * h * 0.4,
@@ -273,7 +287,7 @@
       s.x -= s.v; s.y += s.v * 0.45; s.life -= 0.016;
       const ex = s.x + s.len, ey = s.y - s.len * 0.45;
       const g = ctx.createLinearGradient(s.x, s.y, ex, ey);
-      g.addColorStop(0, `rgba(255,255,255,${s.life})`);
+      g.addColorStop(0, `rgba(255,255,255,${Math.max(s.life, 0)})`);
       g.addColorStop(1, 'rgba(255,61,242,0)');
       ctx.strokeStyle = g;
       ctx.lineWidth = 1.6 * dpr;
@@ -281,21 +295,31 @@
     }
   }
 
-  function loop() { draw(); requestAnimationFrame(loop); }
-  addEventListener('resize', resize);
+  let resizeTimer;
+  addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
   resize();
-  if (!reduce) loop();
+  if (!reduce) {
+    const loop = (now) => { draw(now); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  } else {
+    addEventListener('scroll', () => draw(performance.now()), { passive: true });
+  }
 
   /* ---------- Pointer: parallax, cursor glow ---------- */
   const glow = document.querySelector('.cursor-glow');
+  let glowRaf = 0, gx = 0, gy = 0;
   addEventListener('pointermove', (e) => {
     mouse.tx = e.clientX / innerWidth - 0.5;
     mouse.ty = e.clientY / innerHeight - 0.5;
     if (finePointer && !reduce) {
-      glow.style.opacity = 1;
-      glow.style.transform = `translate(${e.clientX - 230}px, ${e.clientY - 230}px)`;
+      gx = e.clientX; gy = e.clientY;
+      if (!glowRaf) glowRaf = requestAnimationFrame(() => {
+        glowRaf = 0;
+        glow.style.opacity = 1;
+        glow.style.transform = `translate3d(${gx - 230}px, ${gy - 230}px, 0)`;
+      });
     }
-  });
+  }, { passive: true });
   document.addEventListener('pointerleave', () => (glow.style.opacity = 0));
 
   /* ---------- Scroll progress ---------- */
@@ -304,7 +328,8 @@
     const max = document.documentElement.scrollHeight - innerHeight;
     progress.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
   };
-  addEventListener('scroll', onScroll, { passive: true });
+  let progRaf = 0;
+  addEventListener('scroll', () => { if (!progRaf) progRaf = requestAnimationFrame(() => { progRaf = 0; onScroll(); }); }, { passive: true });
   onScroll();
 
   /* ---------- Reveal on scroll (staggered) ---------- */
@@ -331,16 +356,24 @@
   /* ---------- Card tilt + spotlight ---------- */
   if (finePointer && !reduce) {
     document.querySelectorAll('.tilt').forEach((card) => {
-      card.addEventListener('pointermove', (e) => {
-        const r = card.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width;
-        const py = (e.clientY - r.top) / r.height;
+      let raf = 0, ev = null;
+      const apply = () => {
+        raf = 0;
+        if (!ev) return;
+        const r = card.getBoundingClientRect(); // once per frame, only for the hovered card
+        const px = (ev.clientX - r.left) / r.width;
+        const py = (ev.clientY - r.top) / r.height;
         card.style.setProperty('--mx', `${px * 100}%`);
         card.style.setProperty('--my', `${py * 100}%`);
-        card.style.setProperty('--ry', `${(px - 0.5) * 8}deg`);
-        card.style.setProperty('--rx', `${(0.5 - py) * 8}deg`);
-      });
+        card.style.setProperty('--ry', `${(px - 0.5) * 6}deg`);
+        card.style.setProperty('--rx', `${(0.5 - py) * 6}deg`);
+      };
+      card.addEventListener('pointermove', (e) => {
+        ev = e;
+        if (!raf) raf = requestAnimationFrame(apply);
+      }, { passive: true });
       card.addEventListener('pointerleave', () => {
+        ev = null;
         card.style.setProperty('--rx', '0deg');
         card.style.setProperty('--ry', '0deg');
       });
@@ -480,7 +513,7 @@
     const sx = sc.getContext('2d');
     let SW, SH, sr;
     const sizeSparkle = () => {
-      sr = Math.min(window.devicePixelRatio || 1, 2);
+      sr = Math.min(window.devicePixelRatio || 1, 1.5);
       SW = sc.width = innerWidth * sr;
       SH = sc.height = innerHeight * sr;
     };
@@ -490,7 +523,7 @@
     let parts = [], running = false, lastX = -99, lastY = -99;
 
     const spawn = (x, y, burst) => {
-      if (parts.length > 300) return;
+      if (parts.length > 160) return;
       const spread = burst ? 6 : 1.2;
       parts.push({
         x: x * sr, y: y * sr,
@@ -512,8 +545,6 @@
       sx.rotate(p.rot);
       sx.globalAlpha = p.life;
       sx.fillStyle = p.c;
-      sx.shadowColor = p.c;
-      sx.shadowBlur = 8 * sr;
       sx.beginPath();
       for (let i = 0; i < 8; i++) {
         const r = i % 2 ? s * 0.35 : s;
@@ -526,6 +557,7 @@
     };
     function tickSparkles() {
       sx.clearRect(0, 0, SW, SH);
+      sx.globalCompositeOperation = 'lighter';
       parts = parts.filter((p) => p.life > 0);
       for (const p of parts) {
         p.x += p.vx; p.y += p.vy; p.vy += 0.04 * sr; p.vx *= 0.98; p.rot += p.vr; p.life -= p.decay;
